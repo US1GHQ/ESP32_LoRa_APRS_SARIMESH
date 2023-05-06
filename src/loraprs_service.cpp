@@ -575,47 +575,56 @@ void Service::kissForwardPacketFromLoRa(uint8_t *rxBuffer , int packetSize) {
    kissPDUcheckTX(rxBuffer , packetSize) ;  // dump KISS packet we are going to send to KISS Host
    LastFunction = __func__ ;
   
-   if((BT_KISS_Mode || Serial_KISS_Mode) && (!TCP_KISS_Mode )){
+   if((BT_KISS_Mode || Serial_KISS_Mode) && (!TCP_KISS_Mode ))
+   {
       aSerial->write(KissMarker::Fend);
       aSerial->write(KissCmd::Data);
-      }
-   else if(!BT_KISS_Mode && !Serial_KISS_Mode && TCP_KISS_Mode ){
+   }
+   else if(!BT_KISS_Mode && !Serial_KISS_Mode && TCP_KISS_Mode )
+   {
       Kiss_client.write(KissMarker::Fend);
       Kiss_client.write(KissCmd::Data);
-      };
-   int ptr=0;   int rxBufIndex = 0;
-   while (ptr <= packetSize) {
-      byte rxByte = rxBuffer[ptr]; ptr++;
-      if((BT_KISS_Mode || Serial_KISS_Mode) && (!TCP_KISS_Mode)){
-         if (rxByte == KissMarker::Fend) {
+   };
+   for (int i = 0; i < packetSize; i++) {
+      byte rxByte = rxBuffer[i];
+      if((BT_KISS_Mode || Serial_KISS_Mode) && (!TCP_KISS_Mode))
+      {
+         if (rxByte == KissMarker::Fend)
+         {
             aSerial->write(KissMarker::Fesc);
             aSerial->write(KissMarker::Tfend);
-            }
-         else if(rxByte == KissMarker::Fesc){
+         }
+         else if(rxByte == KissMarker::Fesc)
+         {
             aSerial->write(KissMarker::Fesc);
             aSerial->write(KissMarker::Tfesc);
-            }
-         else {
-            rxBuf[rxBufIndex++] = rxByte;
-            aSerial->write(rxByte); 
-            };  // send to serial if in KISS mode
          }
-      else if(!BT_KISS_Mode && !Serial_KISS_Mode && TCP_KISS_Mode){
-         if (rxByte == KissMarker::Fend) {
+         else
+         {
+         //   rxBuf[rxBufIndex++] = rxByte;
+            aSerial->write(rxByte); 
+         };  // send to serial if in KISS mode
+      }
+      else if(!BT_KISS_Mode && !Serial_KISS_Mode && TCP_KISS_Mode)
+      {
+         if (rxByte == KissMarker::Fend)
+         {
             Kiss_client.write(KissMarker::Fesc);
             Kiss_client.write(KissMarker::Tfend);
-            }
-         else if(rxByte == KissMarker::Fesc){
+         }
+         else if(rxByte == KissMarker::Fesc)
+         {
             Kiss_client.write(KissMarker::Fesc);
             Kiss_client.write(KissMarker::Tfesc);
-            }
-         else {
-            rxBuf[rxBufIndex++] = rxByte;
+         }
+         else 
+         {
+          //  rxBuf[rxBufIndex++] = rxByte;
             Kiss_client.write(rxByte); 
-            };  // send to serial if in KISS mode
-         };        
-      };  // end of received packet scannning 
-    
+         };  // send to serial if in KISS mode
+      };        
+   };  // end of received packet scannning 
+
    if((BT_KISS_Mode || Serial_KISS_Mode) && (!TCP_KISS_Mode)){
       aSerial->write(KissMarker::Fend);
       if(APRS_debug) debugA("--> onLoraDataAvailable: end of Bt data repeat...\n");
@@ -624,7 +633,6 @@ void Service::kissForwardPacketFromLoRa(uint8_t *rxBuffer , int packetSize) {
       Kiss_client.write(KissMarker::Fend);
       if(APRS_debug) debugA("--> onLoraDataAvailable: end of Bt data repeat...\n");  
       };
-   
    Kiss_tx_packets++ ; // increment KISS TX packets counter
 }
 
@@ -632,27 +640,29 @@ void Service::kissForwardPacketFromLoRa(uint8_t *rxBuffer , int packetSize) {
 void Service::onLoraDataAvailable(uint8_t *rxBuffer , int packetSize, String signalReport, String my_spot) {
    static byte Msg[512]; Msg[0]='<' ; Msg[1]= 0xFF; Msg[2]=0x01;
    String OE_Packet_header = (char *)Msg ;    
-   String OE_Packet = "";    
+   String OE_Packet = "";
    float l_snr, rssi, bw, frequencyError ;
    byte rxBuf[packetSize];
 
    LastFunction = __func__ ;
    if(APRS_debug)  debugA("**************onLoraDataAvailable********************=> LoRa RX_packetSize=%d  \r", packetSize);
    int ptr=0;   int rxBufIndex = 0;
-   while (ptr <= packetSize) {   // copy received packet to a local buffer
+   while (ptr <= packetSize - 1)
+   {   // copy received packet to a local buffer
       byte rxByte = rxBuffer[ptr]; ptr++;
       rxBuf[rxBufIndex++] = rxByte;
-      };  // end of received packet scannning   
+   };  // end of received packet scannning   
 
    //  rxBufIndex-- ;   // by MF 20220130
-   rxBuf[rxBufIndex +1 ]='\0'; // fix rxBuffer length
-   //  rxBuf[rxBufIndex  ]='\0'; // fix rxBuffer length
+       rxBuf[rxBufIndex+1]='\0'; // fix rxBuffer length
+   //  rxBuf[rxBufIndex]='\0'; // fix rxBuffer length
 
    bool local_is_CRC_Errored = false ;
    int posCRC_Errored = signalReport.indexOf("CRC_Error");   // lets flag CRC_ErroredPackets
-   if(posCRC_Errored > 0) {
+   if(posCRC_Errored > 0)
+   {
       local_is_CRC_Errored = true;        
-      };
+   };
 
    // we try now to identify received packet format... first just try to check if it is an AX.25 packet
    AX25::Payload payload(rxBuf, rxBufIndex);  // assume to be an AX.25 payload and check for validity     
@@ -671,61 +681,75 @@ void Service::onLoraDataAvailable(uint8_t *rxBuffer , int packetSize, String sig
          return ; 
          }; // no further actions for CRC errored packets
 
-      if (isClient_) {        // just send the new packet to the KISS interface
-         kissForwardPacketFromLoRa( rxBuffer ,  packetSize);   // send new lora packet to KISS interface
+      if (isClient_)
+      {        // just send the new packet to the KISS interface
+         kissForwardPacketFromLoRa(rxBuffer,  packetSize);   // send new lora packet to KISS interface
          return ;
-         }
-      else { //  !isClient_ so do futher processing ..... 
-         if( (textPayload.indexOf("LoRa") < 0 ) || ( textPayload.indexOf("qAS") > 0 )) {
+      }
+      else
+      { //  !isClient_ so do futher processing ..... 
+         if( (textPayload.indexOf("LoRa") < 0 ) || ( textPayload.indexOf("qAS") > 0 ))
+         {
             debugA("--> IsRelayedAprsIs: skipping APRS-IS relayed payload or LoRa repeated packets %s\r\n",textPayload.c_str());
             return;
-            } ;
+         } ;
          if(APRS_debug) debugA("onLoraDataAvailable: ===========> Packet: ownCallsign_= %s - textPayload= [%s]\r\n", ownCallsign_.ToString().c_str(), textPayload.c_str() );
-         if (payload.Digirepeat(ownCallsign_)  ) {
+         if (payload.Digirepeat(ownCallsign_))
+         {
             if(APRS_debug) debugA("\ronLoraDataAvailable: -------> payload after Digirepeat = [%s]\r",payload.ToString().c_str() );         
-#ifndef APRS_IS_DISABLE
+            #ifndef APRS_IS_DISABLE
             if (enableRfToIs_  ) {  //  we are an iGate ... try to relay to APRS-IS by filtering payload
-               if( (payload.ToString()).indexOf("FromInt") > 0  ) { 
+               if( (payload.ToString()).indexOf("FromInt") > 0  )
+               { 
                   if(APRS_debug) debugA("onLoraDataAvailable: Disposition: --> IsAprsIsOriginated; not sending to APRS-IS: %s\r",(payload.ToString()).c_str());
-                  }
-               else {
-                  if( PayloadStyle == 1){
+               }
+               else
+               {
+                  if( PayloadStyle == 1)
+                  {
                      sendToAprsis( payload.ToString());  // pure_OE_style  no path tracing at all
-                     }
-                  else{
+                  }
+                  else
+                  {
                      sendToAprsis( payload.ToString() + signalReport);
-                     };
+                  };
                   if(APRS_debug) debugA("Disposition: ==> Packet sent to APRS-IS\r");
                };
              };
-#endif
-         if( PayloadStyle == 1){
+            #endif
+         if( PayloadStyle == 1)
+         {
             payload.fromString(payload.ToString());   // add our passtag to the packet to be relayed or transferred to aprs-is
-            }
-         else{
+         }
+         else
+         {
             payload.fromString(payload.ToString() + signalReport);   // add our passtag to the packet to be relayed or transferred to aprs-is
-            };      
-         if ((enableRepeater_ ) && (RepeaterOperation == 0 )){
+         };      
+         if ((enableRepeater_ ) && (RepeaterOperation == 0 ))
+         {
             if(APRS_debug) debugA("onLoraDataAvailable: Disposition: ==> Send Packet to LoRa..\r");
             vTaskDelay(pdMS_TO_TICKS(100));
             bool ret= sendToLora(payload, true, false );   // try do relay received packet to LoRa if this is required and filter payload 
             if(ret){ if(APRS_debug) debugA("To_LoRa (628) ==> [%s]\n",(payload.ToString()).c_str());  };
             if((APRS_debug)&& (ret))debugA("onLoraDataAvailable: Disposition => Packet digirepeated \r");
-            };
-         }
-      else{
-         if(APRS_debug) debugA("onLoraDataAvailable: Disposition => Packet NOT digirepeated: ownCallsign_= %s - payload=[%s]\r", ownCallsign_.ToString().c_str(), payload.ToString().c_str() );
          };
+       }
+      else
+      {
+         if(APRS_debug) debugA("onLoraDataAvailable: Disposition => Packet NOT digirepeated: ownCallsign_= %s - payload=[%s]\r", ownCallsign_.ToString().c_str(), payload.ToString().c_str() );
+      };
       }; // end of !isClient_
    }    // end of payload.IsValid() i.e. it is an AX.25 packet
 
    // following code is for NON AX.25 packets received
    // try to identify alternative encapsulation styles ( i.e. OE_Style , APRS434, etc.)
    // try for OE_Style packet format 
-   else if ( (rxBuf[0] == '<') && (rxBuf[1] == 0xFF) && (rxBuf[2] == 0x01)  ) {     //  APRS_OE_Style LoRa packet
-      rxBufIndex-- ;   // by MF 20220130
+   else if ((rxBuf[0] == '<') && (rxBuf[1] == 0xFF) && (rxBuf[2] == 0x01))
+   {     //  APRS_OE_Style LoRa packet
+   // rxBufIndex-- ;   // by MF 20220130
       rxBuf[rxBufIndex ]='\0';        
-      OE_Packet =  (char *)rxBuf;  OE_Packet = OE_Packet.substring(3);
+      OE_Packet =  (char *)rxBuf;
+      OE_Packet = OE_Packet.substring(3);
       //  OE_Packet = OE_Packet.substring(0, OE_Packet.length() - 1); // 20211116 by MF
       if(APRS_debug) debugA("onLoraDataAvailable: ---789---->   OE_Packet received= [%s]\n\r",OE_Packet.c_str() );
       // String OE_textPayload = addSignalReport_ ? signalReport : String();
@@ -735,18 +759,23 @@ void Service::onLoraDataAvailable(uint8_t *rxBuffer , int packetSize, String sig
       if(APRS_debug) debugA("From_LoRa_OE     <== OE_Packet=[%s]  signalReport=[%s] \n",OE_Packet.c_str(), signalReport.c_str());
       // write to FRAM log the received LoRa packet and send spot message to sarimesh server
       send_log_msg(OE_Packet, signalReport, my_spot);   // send to spot log server  tag 2
-      if (isClient_) {  // just send the new packet to the KISS interface
+      if (isClient_)
+      {  // just send the new packet to the KISS interface
          AX25::Payload AX25_payload(OE_Packet);   // create a standard payload in AX.25 format to be transferred to KISS host
-         if (AX25_payload.IsValid()) {  //  APRS_AX25_Style LoRa packet
+         if (AX25_payload.IsValid())
+         {  //  APRS_AX25_Style LoRa packet
             if(APRS_debug) debugA("----AX25_payload ------->  valid AX25 payload created = [%s]\r",AX25_payload.ToString().c_str() );
-            int new_buf_len= AX25_payload.ToString().length(); 
-            byte new_buf[new_buf_len+1];
-            AX25_payload.ToBinary( new_buf ,new_buf_len );                 
-            kissForwardPacketFromLoRa( (uint8_t *)new_buf , new_buf_len );   // send new lora OE_packet transformed in AX.25 to KISS interface
-            };
+            byte buf[RADIOLIB_SX127X_MAX_PACKET_LENGTH + 1];
+            int cpySize = AX25_payload.ToString().length();
+            memcpy(buf, rxBuf, cpySize);
+            buf[cpySize] = '\0';
+            AX25_payload.ToBinary(buf, cpySize);                 
+            kissForwardPacketFromLoRa((uint8_t *)buf, cpySize);   // send new lora OE_packet transformed in AX.25 to KISS interface
+         };
          return ;
-         }
-      else { //  !isClient_ futher processing ..... 
+      }
+      else
+      { //  !isClient_ futher processing ..... 
          // this is the "what to do with the received LoRa payload" task...
          if(local_is_CRC_Errored){ 
             debugA("--> Discarding  CRC_Errored packet= [%s]\r", OE_textPayload.c_str());
@@ -776,7 +805,7 @@ void Service::onLoraDataAvailable(uint8_t *rxBuffer , int packetSize, String sig
          // if(APRS_debug) debugA("onLoraDataAvailable: ====== AprsLoginRep= %s =====> OE_Packet: ownCallsign_= %s - textPayload= [%s]\r", AprsLoginRep.c_str(), ownCallsign_.ToString().c_str(), OE_textPayload.c_str() );
          if (payload.Digirepeat(ownCallsign_)  ) {
             if(APRS_debug) debugA("\ronLoraDataAvailable:  -------> payload after Digirepeat = [%s]\r",payload.ToString().c_str() );         
-#ifndef APRS_IS_DISABLE
+            #ifndef APRS_IS_DISABLE
             if (enableRfToIs_  ) {  //  we are an iGate ... try to relay to APRS-IS by filtering payload
                if( (payload.ToString()).indexOf("FromInt") > 0  ) { 
                   if(APRS_debug) debugA("Disposition: --> IsAprsIsOriginated; not sending to APRS-IS: %s\r",(payload.ToString()).c_str());
@@ -791,27 +820,31 @@ void Service::onLoraDataAvailable(uint8_t *rxBuffer , int packetSize, String sig
                   if(APRS_debug) debugA("Disposition: ==> Packet sent to APRS-IS\r");
                   };
                };
-#endif
-            if( PayloadStyle == 1){
+            #endif
+            if(PayloadStyle == 1)
+            {
                payload.fromString(payload.ToString());   // add our passtag to the packet to be relayed or transferred to aprs-is
-               }
-            else{
+            }
+            else
+            {
                payload.fromString(payload.ToString() + signalReport);   // add our passtag to the packet to be relayed or transferred to aprs-is
-               };
+            };
 
-            if ((enableRepeater_ ) && (RepeaterOperation == 0 )){
+            if ((enableRepeater_ ) && (RepeaterOperation == 0 ))
+            {
                if(APRS_debug) debugA("onLoraDataAvailable: Disposition: ==> Packet sent to APRS-IS\r");
                vTaskDelay(pdMS_TO_TICKS(100));
                bool ret= sendToLora(payload, true , false);   // try to relay received packet to LoRa if this is required and filter payload 
                if(ret){if(APRS_debug)  debugA("  To_LoRa_OE (628) ==> [%s]\n",(payload.ToString()).c_str());  };
                if((APRS_debug)&& (ret))debugA("onLoraDataAvailable: Disposition => Packet digirepeated \r");
-             };
-            }
-         else{
-            if(APRS_debug) debugA("onLoraDataAvailable: Disposition => Packet NOT digirepeated: ownCallsign_= %s - payload= [%s]\r", ownCallsign_.ToString().c_str(), payload.ToString().c_str() );
             };
-         }; // end of !isClient_ 
-      }       // end of APRS_OE_Style LoRa packet
+         }
+         else
+         {
+            if(APRS_debug) debugA("onLoraDataAvailable: Disposition => Packet NOT digirepeated: ownCallsign_= %s - payload= [%s]\r", ownCallsign_.ToString().c_str(), payload.ToString().c_str() );
+         };
+      }; // end of !isClient_ 
+   }       // end of APRS_OE_Style LoRa packet
 
    // Following is the APRS434 packet format received  ... still to be decided if to implement somethinh 
    /*

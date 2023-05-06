@@ -1,6 +1,6 @@
 // webhome.cpp
 
-#include "webhome.h"
+#include "GUI/webhome.h"
 
 void filldynamicdata(){        
     String values ="";
@@ -19,7 +19,6 @@ void processHome(){
     } ;
   web_server.send ( 200, "text/html", PAGE_HOME  ); 
 }
-
 
 void send_home_html() {
   if (web_server.args() > 0 ) {    // Save Settings 
@@ -46,4 +45,3 @@ void send_example_configuration_values_html() {
   web_server.send ( 200, "text/plain", examplevalues);
   if(WebConfig_debug) Serial.println(__FUNCTION__); 
 }
-

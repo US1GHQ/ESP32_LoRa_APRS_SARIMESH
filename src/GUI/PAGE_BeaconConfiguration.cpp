@@ -1,5 +1,5 @@
 // PAGE_BeaconConfiguration.cpp
-#include "PAGE_BeaconConfiguration.h"
+#include "GUI/PAGE_BeaconConfiguration.h"
 
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES

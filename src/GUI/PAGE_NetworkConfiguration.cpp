@@ -1,6 +1,6 @@
 // PAGE_NetworkConfiguration.cpp
 
-#include "PAGE_NetworkConfiguration.h"
+#include "GUI/PAGE_NetworkConfiguration.h"
 
 
 
@@ -15,22 +15,22 @@ void send_network_configuration_html() {
 		for ( uint8_t i = 0; i < web_server.args(); i++ ) {
 			if (web_server.argName(i) == "ssid") ESP_Config.ssid =   urldecode(web_server.arg(i));
 			if (web_server.argName(i) == "password") ESP_Config.password =    urldecode(web_server.arg(i)); 
-			if (web_server.argName(i) == "ip_0") if (checkRange(web_server.arg(i))) 	ESP_Config.IP[0] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "ip_1") if (checkRange(web_server.arg(i))) 	ESP_Config.IP[1] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "ip_2") if (checkRange(web_server.arg(i))) 	ESP_Config.IP[2] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "ip_3") if (checkRange(web_server.arg(i))) 	ESP_Config.IP[3] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "nm_0") if (checkRange(web_server.arg(i))) 	ESP_Config.Netmask[0] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "nm_1") if (checkRange(web_server.arg(i))) 	ESP_Config.Netmask[1] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "nm_2") if (checkRange(web_server.arg(i))) 	ESP_Config.Netmask[2] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "nm_3") if (checkRange(web_server.arg(i))) 	ESP_Config.Netmask[3] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "gw_0") if (checkRange(web_server.arg(i))) 	ESP_Config.Gateway[0] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "gw_1") if (checkRange(web_server.arg(i))) 	ESP_Config.Gateway[1] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "gw_2") if (checkRange(web_server.arg(i))) 	ESP_Config.Gateway[2] =  web_server.arg(i).toInt();
-			if (web_server.argName(i) == "gw_3") if (checkRange(web_server.arg(i))) 	ESP_Config.Gateway[3] =  web_server.arg(i).toInt();
-      		if (web_server.argName(i) == "dns_0") if (checkRange(web_server.arg(i)))   ESP_Config.Dns[0] =  web_server.arg(i).toInt();
-      		if (web_server.argName(i) == "dns_1") if (checkRange(web_server.arg(i)))   ESP_Config.Dns[1] =  web_server.arg(i).toInt();
-      		if (web_server.argName(i) == "dns_2") if (checkRange(web_server.arg(i)))   ESP_Config.Dns[2] =  web_server.arg(i).toInt();
-      		if (web_server.argName(i) == "dns_3") if (checkRange(web_server.arg(i)))   ESP_Config.Dns[3] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "ip_0") if (checkRange(web_server.arg(i))) ESP_Config.IP[0] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "ip_1") if (checkRange(web_server.arg(i))) ESP_Config.IP[1] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "ip_2") if (checkRange(web_server.arg(i))) ESP_Config.IP[2] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "ip_3") if (checkRange(web_server.arg(i))) ESP_Config.IP[3] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "nm_0") if (checkRange(web_server.arg(i))) ESP_Config.Netmask[0] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "nm_1") if (checkRange(web_server.arg(i))) ESP_Config.Netmask[1] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "nm_2") if (checkRange(web_server.arg(i))) ESP_Config.Netmask[2] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "nm_3") if (checkRange(web_server.arg(i))) ESP_Config.Netmask[3] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "gw_0") if (checkRange(web_server.arg(i))) ESP_Config.Gateway[0] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "gw_1") if (checkRange(web_server.arg(i))) ESP_Config.Gateway[1] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "gw_2") if (checkRange(web_server.arg(i))) ESP_Config.Gateway[2] =  web_server.arg(i).toInt();
+			if (web_server.argName(i) == "gw_3") if (checkRange(web_server.arg(i))) ESP_Config.Gateway[3] =  web_server.arg(i).toInt();
+      		if (web_server.argName(i) == "dns_0") if (checkRange(web_server.arg(i))) ESP_Config.Dns[0] =  web_server.arg(i).toInt();
+      		if (web_server.argName(i) == "dns_1") if (checkRange(web_server.arg(i))) ESP_Config.Dns[1] =  web_server.arg(i).toInt();
+      		if (web_server.argName(i) == "dns_2") if (checkRange(web_server.arg(i))) ESP_Config.Dns[2] =  web_server.arg(i).toInt();
+      		if (web_server.argName(i) == "dns_3") if (checkRange(web_server.arg(i))) ESP_Config.Dns[3] =  web_server.arg(i).toInt();
 			if (web_server.argName(i) == "dhcp") ESP_Config.dhcp = true;
 			} ;
 	  	web_server.send ( 200, "text/html", PAGE_WaitAndReload );

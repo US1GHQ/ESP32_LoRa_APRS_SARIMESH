@@ -1,5 +1,5 @@
 // PAGE_DebugConfiguration.cpp
-#include "PAGE_DebugConfiguration.h"
+#include "GUI/PAGE_DebugConfiguration.h"
 
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES

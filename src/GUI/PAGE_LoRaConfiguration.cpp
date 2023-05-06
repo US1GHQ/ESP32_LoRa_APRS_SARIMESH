@@ -1,6 +1,6 @@
 // PAGE_LoRaConfiguration.cpp
 
-#include "PAGE_LoRaConfiguration.h"
+#include "GUI/PAGE_LoRaConfiguration.h"
 
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES
@@ -14,8 +14,8 @@ void send_lora_configuration_html() {
       if (web_server.argName(i) == "LoraPreambleLen") ESP_Config.LoraPreambleLen =  web_server.arg(i).toInt();
       if (web_server.argName(i) == "LoraSync") ESP_Config.LoraSync =  web_server.arg(i).toInt();
       if (web_server.argName(i) == "LoraPower") ESP_Config.LoraPower =  web_server.arg(i).toInt();
-      if (web_server.argName(i) == "LoraFreq") ESP_Config.LoraFreq =   urldecode(web_server.arg(i));
-      if (web_server.argName(i) == "LoraBw") ESP_Config.LoraBw =   urldecode(web_server.arg(i));
+      if (web_server.argName(i) == "LoraFreq") ESP_Config.LoraFreq = urldecode(web_server.arg(i));
+      if (web_server.argName(i) == "LoraBw") ESP_Config.LoraBw = urldecode(web_server.arg(i));
       if (web_server.argName(i) == "LoraFreqCorr") ESP_Config.LoraFreqCorr =  web_server.arg(i).toInt();
 	  	};
 	  web_server.send ( 200, "text/html", PAGE_LoRaWaitAndReload );

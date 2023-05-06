@@ -1,7 +1,5 @@
 // PAGE_General.cpp
-#include "PAGE_General.h"
-
-
+#include "GUI/PAGE_General.h"
 
 String get_device_id(void){
     String _apName = WiFi.macAddress();
@@ -9,7 +7,6 @@ String get_device_id(void){
     _apName.replace(":","");
     return (_apName);
 }
-
 
 // Functions for this Page
 void send_devicename_value_html() {
@@ -68,4 +65,3 @@ void send_general_configuration_values_html() {
 	web_server.send ( 200, "text/plain", values);
 	if(WebConfig_debug) Serial.println(__FUNCTION__); 
 }
-

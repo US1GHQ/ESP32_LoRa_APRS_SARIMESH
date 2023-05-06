@@ -1,5 +1,5 @@
 // PAGE_Dashboard.cpp
-#include "PAGE_Dashboard.h"
+#include "GUI/PAGE_Dashboard.h"
 
 //
 // FILL WITH INFOMATION

@@ -1,5 +1,5 @@
 //PAGE_hwadj.cpp
-#include "PAGE_hwadj.h"
+#include "GUI/PAGE_hwadj.h"
 
 
 //

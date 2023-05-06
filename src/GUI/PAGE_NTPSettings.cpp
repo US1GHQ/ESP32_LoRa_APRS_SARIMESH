@@ -1,6 +1,6 @@
 // PAGE_NTPSettings.cpp
 
-#include "PAGE_NTPSettings.h"
+#include "GUI/PAGE_NTPSettings.h"
 
 void send_NTP_configuration_html() {
 	if (web_server.args() > 0 ) { // Save Settings

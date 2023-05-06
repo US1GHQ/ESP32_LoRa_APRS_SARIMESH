@@ -1,6 +1,6 @@
 // PAGE_IoT_Configuration.cpp
 
-#include "PAGE_IoT_Configuration.h"
+#include "GUI/PAGE_IoT_Configuration.h"
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES
 // 

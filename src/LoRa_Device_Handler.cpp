@@ -84,7 +84,7 @@ bool LDH_SetLoraConfig(float loraFreq, float bw, byte sf, byte cr, int pwr, byte
         if(LoRa_debug) debugA("failed, code %d: Aborting... please fix and reboot !\r ",state );
         return (false) ;
         };
-      lora_2g.setRfSwitchPins(16, 17);
+      lora_2g.setRfSwitchPins(RXEN_PIN, TXEN_PIN);
       // eByte E22-900M22S uses DIO3 to supply the external TCXO
 
       if (lora_2g.setTCXO(2.4) == RADIOLIB_ERR_INVALID_TCXO_VOLTAGE){ if(LoRa_debug) debugA("\rSelected TCXO voltage is invalid for this module!\r");} ;
@@ -133,7 +133,7 @@ bool LDH_SetLoraConfig(float loraFreq, float bw, byte sf, byte cr, int pwr, byte
         if(LoRa_debug) debugA("failed, code %d: Aborting... please fix and reboot !\r ",state );
         return (false) ;
         };
-      lora_2g.setRfSwitchPins(16, 17);   
+      lora_2g.setRfSwitchPins(RXEN_PIN, TXEN_PIN);   
       if (lora_2g.setOutputPower((int)pwr) != RADIOLIB_ERR_NONE){ if(LoRa_debug) debugA("\rSelected outputPower is invalid for this module!\r");};
       debugA("\rgetCurrentLimit() = %f \r",lora_2g.getCurrentLimit());
       // setup rx interrupt support
@@ -176,7 +176,7 @@ else {
       if(LoRa_debug) debugA("failed, code %d: Aborting... please fix and reboot !\r ",state );
       return(false);
       };
-    lora_1g.setDio0Action(setFlag);                                                        
+    lora_1g.setDio0Action(setFlag, RISING);                                                        
     if(LoRa_debug) debugA("[SX1278] Starting to listen ... ");  // start listening for LoRa packets
     state = lora_1g.startReceive();
     if (state == RADIOLIB_ERR_NONE) {
@@ -716,7 +716,8 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
       if(LoRa_debug)debugA("LoRa_Device_Handler: perform received packet report analyses\r");
       // perform received packet report analyses
       float l_snr , rssi ;
-      if(LoraDeviceType == 0){  // first generation lora chips
+      if(LoraDeviceType == 0)
+      {  // first generation lora chips
         l_snr = lora_1g.getSNR();
         rssi = lora_1g.getRSSI();
         frequencyError = lora_1g.getFrequencyError();
@@ -724,34 +725,42 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
         float ppm_now = frequencyError/LoRaFreqNow ;
         ppm_runtime= (3.0*ppm_runtime + ppm_now )/4.0;
         if(LoRa_debug) debugA("\r===-------=====> LoRaFreqNow=%12.5f - frequencyError=%8.5f - ppm_now=%8.5f  ==> ppm_runtime=%8.5f\r",LoRaFreqNow, frequencyError, ppm_now , ppm_runtime);
-        }
-      else{
+      }
+        else
+      {
         l_snr = lora_2g.getSNR();
         rssi = lora_2g.getRSSI();
-        frequencyError = 0.0;
-        lora_frequencyError = frequencyError;        
-        };    
+        frequencyError = lora_2g.getFrequencyError();
+        lora_frequencyError = frequencyError;
+        float ppm_now = frequencyError/LoRaFreqNow ;
+        ppm_runtime= (3.0*ppm_runtime + ppm_now )/4.0;
+        if(LoRa_debug) debugA("\r===-------=====> LoRaFreqNow=%12.5f - frequencyError=%8.5f - ppm_now=%8.5f  ==> ppm_runtime=%8.5f\r",LoRaFreqNow, frequencyError, ppm_now , ppm_runtime);
+      };    
 
       lora_snr = l_snr ;
       lora_rssi = (l_snr < 0 ? rssi + l_snr : rssi);
-      if(l_snr < 0){
+      if(l_snr < 0)
+      {
         if( LoRa_ENL == 0.0){LoRa_ENL = rssi;} else { LoRa_ENL = (4*LoRa_ENL + rssi)/5;};
-        };
+      };
       // we are ready to receive new packets
       receivedFlag == false; // clear receivedFlag
       uint16_t state ;  
-      if(LoraDeviceType == 0){  // first generation lora chips
+      if(LoraDeviceType == 0)
+      {  // first generation lora chips
         state = lora_1g.startReceive();
-        }
-      else{
+      }
+      else
+      {
         state = lora_2g.startReceive();
-        } ;
+      };
       if (state == RADIOLIB_ERR_NONE) {
         // if(LoRa_debug) debugA("success!\r");
-        }     
-      else {
+      }     
+      else
+      {
         if(LoRa_debug) debugA("LoRa_Device_Handler: lora_x.startReceive() FAILED, code %d \r ",state );
-        };  
+      };  
       enableInterrupt = true;          // enable interrupt service routine
 
       // let's now assemble RX repeort related to the received packet
@@ -776,7 +785,8 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
         String(" ") + 
         String(l_snr) + 
         String(" 0 ") +
-        String(" ") + 
+        String(" ") +
+        String(frequencyError) + String(" ") + 
         String(cpu_temp) + 
         String(")") ;
         };
@@ -794,23 +804,25 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
       
       bool is_AX25 = false ; bool is_OE_Style = false; bool is_native = false ;
       AX25::Payload payload(LDH_Buffer, packetSize);  // assume to be an AX.25 payload and check for validity
-      if (payload.IsValid()) {  //  it is an AX25 APRS packet
+      if (payload.IsValid())
+      {  //  it is an AX25 APRS packet
         is_AX25 = true ;
         LoRa_rx_AX25_packets ++;
         if(LoRa_debug) debugA("LoRa_Device_Handler: found possible APRS AX25 payload (..may be errored..)!\r");
-        }
-      else if ( (LDH_Buffer[0] == '<') && (LDH_Buffer[1] == 0xFF) && (LDH_Buffer[2] == 0x01)  ) {     //  APRS_OE_Style LoRa packet
+      }
+      else if ( (LDH_Buffer[0] == '<') && (LDH_Buffer[1] == 0xFF) && (LDH_Buffer[2] == 0x01))
+      {     //  APRS_OE_Style LoRa packet
         is_OE_Style = true ;
         LoRa_rx_OEStyle_packets++;
         if(LoRa_debug) debugA("LoRa_Device_Handler: found possible APRS is_OE_Style payload (..may be errored..)!\r");
-        }
-      else {
+      }
+      else
+      {
         is_native = true ; 
         LoRa_rx_native_packets++;
         if(LoRa_debug) debugA("LoRa_Device_Handler: found possible native lora packet (..may be errored..)!\r");
-        };
-         
-         
+      };
+
       // send received packet to APRS_service_handler or native_service_handler
       signalReport.toCharArray( LDM_Msg_v2.SigRep ,signalReport.length()+1 );  // fill Signaleport
       LDM_Msg_v2.ack = 1 ; // indicates a successfully received packet      
@@ -820,7 +832,8 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
       // send LDM_Msg_v2 to APRS_Manager for higher level processing 
       if(LoRa_debug) debugA("LoRa_Device_Handler: sending packet via xQueue_APRS or xQueue_native ....(is_AX25=%d - is_OE_Style=%d - is_native=%d - is_CRC_Errored=%d)\r", is_AX25 , is_OE_Style,is_native, is_CRC_Errored );        
       // if (( is_AX25 || is_OE_Style) && (! is_CRC_Errored))  {
-      if (( is_AX25 || is_OE_Style) )  {         
+      if (( is_AX25 || is_OE_Style) )
+      {         
         // if(LoRa_debug) debugA("LoRa_Device_Handler: sending packet via xQueue_APRS....(is_AX25=%d - is_OE_Style=%d - is_native=%d - is_CRC_Errored=%d)\r", is_AX25 , is_OE_Style,is_native, is_CRC_Errored );
         // if(APRS_debug){ int i=0; while(i < LDM_Msg_v2.bufLen ){if(! (i%16))debugAl("\r")  ; debugAl("%02X ", LDM_Msg_v2.bufData[i]); i++;   }; debugAl("\r");};
         if( xQueueSend( xQueue_APRS, (void *)&LDM_Msg_v2, ( TickType_t ) 10 ) != pdPASS ) {
@@ -828,13 +841,15 @@ void LoRa_Device_Handler_loop( void ){      //LoRa_Device_Handler: task to handl
             // RX packet lost due to IPP fault
             IPC_lost_msgs++ ;
             };
-          }
-      else {  // native or CRC_errored packets
+      }
+      else
+      {  // native or CRC_errored packets
         if(LoRa_debug) debugA("LoRa_Device_Handler: sending packet via xQueue_native....(is_AX25=%d - is_OE_Style=%d - is_native=%d - is_CRC_Errored=%d )\r", is_AX25 , is_OE_Style,is_native, is_CRC_Errored );       
-        if( xQueueSend( xQueue_native, (void *)&LDM_Msg_v2, ( TickType_t ) 10 ) != pdPASS ) {
-          if(LoRa_debug) debugA("LoRa_Device_Handler: unable to queue message toward xQueue_native....\r");
-          // RX packet lost due to IPP fault
-          IPC_lost_msgs++ ;
+        if( xQueueSend( xQueue_native, (void *)&LDM_Msg_v2, ( TickType_t ) 10 ) != pdPASS )
+          {
+            if(LoRa_debug) debugA("LoRa_Device_Handler: unable to queue message toward xQueue_native....\r");
+            // RX packet lost due to IPP fault
+            IPC_lost_msgs++ ;
           };
         };
       }   // end of if ((state == RADIOLIB_ERR_NONE) || ((state == RADIOLIB_ERR_CRC_MISMATCH)))

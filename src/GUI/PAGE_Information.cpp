@@ -1,5 +1,5 @@
 // PAGE_Information.cpp
-#include "PAGE_Information.h"
+#include "GUI/PAGE_Information.h"
 
 
 //

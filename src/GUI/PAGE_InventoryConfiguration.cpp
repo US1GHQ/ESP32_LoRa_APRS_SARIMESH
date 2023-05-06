@@ -1,5 +1,5 @@
 // PAGE_InventoryConfiguration.cpp
-#include "PAGE_InventoryConfiguration.h"
+#include "GUI/PAGE_InventoryConfiguration.h"
 
 //
 //  SEND HTML PAGE OR IF A FORM SUMBITTED VALUES, PROCESS THESE VALUES

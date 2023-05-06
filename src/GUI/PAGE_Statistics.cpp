@@ -1,6 +1,5 @@
 // PAGE_Statistics.cpp
-#include "PAGE_Statistics.h"
-
+#include "GUI/PAGE_Statistics.h"
 
 void send_stats_values_html () {
   char TEMP[32],TEMP1[32],TEMP2[32];
@@ -19,6 +18,10 @@ void send_stats_values_html () {
   statsvalues += "x_LoRa_tx_packets|" + String(LoRa_tx_packets) +  "|div\n";
   statsvalues += "x_LoRa_rx_AX25_packets|" + String(LoRa_rx_AX25_packets) +  "|div\n";
   statsvalues += "x_LoRa_tx_AX25_packets|" + String(LoRa_tx_AX25_packets) +  "|div\n";
+  statsvalues += "x_LoRa_rx_OEStyle_packets|" + String(LoRa_rx_OEStyle_packets) +  "|div\n";
+  statsvalues += "x_LoRa_tx_OEStyle_packets|" + String(LoRa_tx_OEStyle_packets) +  "|div\n";
+  statsvalues += "x_LoRa_rx_native_packets|" + String(LoRa_rx_native_packets) +  "|div\n";
+  statsvalues += "x_LoRa_tx_native_packets|" + String(LoRa_tx_native_packets) +  "|div\n";
   statsvalues += "x_LoRa_lost_packets|" + String(LoRa_lost_packets) +  "|div\n";
   statsvalues += "x_AprsIS_rx_packets|" + String(AprsIS_rx_packets) +  "|div\n";
   statsvalues += "x_AprsIS_tx_packets|" + String(AprsIS_tx_packets) +  "|div\n";
@@ -32,6 +35,3 @@ void send_stats_values_html () {
 	web_server.send ( 200, "text/plain", statsvalues);
   if(WebConfig_debug)  debugA("%s",__FUNCTION__); 
 }
-
-
-

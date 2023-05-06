@@ -81,10 +81,12 @@ String Payload::ToString(String customComment) const
 
   txt += String(":") + info_;
 
-  if (info_.startsWith("=")) {
-    txt += customComment;
-  }
-
+  if (info_.startsWith("=") || 
+      info_.startsWith("!") || 
+      info_.startsWith("`"))
+      {
+        txt += customComment;
+      }
   return txt;
 }
 
